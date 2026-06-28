@@ -35,7 +35,7 @@ export function Header({
             <h1 className="truncate text-[26px] font-extrabold leading-none text-slate-950">MINDLET</h1>
             <p className="pb-0.5 text-[15px] font-semibold text-slate-500">상민의 메모보드</p>
             <p className="pb-0.5 text-[15px] font-semibold text-sky-500 md:ml-8">
-              Produced by Sangmin Lee
+              Development by Sangmin Lee
             </p>
           </div>
         </div>
