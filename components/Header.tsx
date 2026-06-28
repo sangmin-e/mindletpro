@@ -5,7 +5,7 @@ import { GoogleAdminLoginButton } from "@/components/GoogleAdminLoginButton";
 
 type HeaderProps = {
   isAdmin: boolean;
-  adminEmail: string | null;
+  userEmail: string | null;
   loading: boolean;
   searchQuery: string;
   onSearchChange: (value: string) => void;
@@ -16,7 +16,7 @@ type HeaderProps = {
 
 export function Header({
   isAdmin,
-  adminEmail,
+  userEmail,
   loading,
   searchQuery,
   onSearchChange,
@@ -49,49 +49,55 @@ export function Header({
             />
           </label>
 
-          <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onSync}
-            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
-            <span>동기화</span>
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200"
-            aria-label="공유"
-            title="공유"
-          >
-            <Share2 className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">공유</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onSync}
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
+              <span>동기화</span>
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200"
+              aria-label="공유"
+              title="공유"
+            >
+              <Share2 className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">공유</span>
+            </button>
 
-          {isAdmin ? (
-            <>
-              <button
-                type="button"
-                onClick={onAdminPanel}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 text-[15px] font-bold text-sky-700 shadow-sm transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100"
-              >
-                <Shield className="h-4 w-4" aria-hidden />
-                <span className="hidden sm:inline">Admin Mode</span>
-              </button>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200"
-                aria-label={`${adminEmail ?? "관리자"} 로그아웃`}
-                title="로그아웃"
-              >
-                <LogOut className="h-4 w-4" aria-hidden />
-              </button>
-            </>
-          ) : (
-            <GoogleAdminLoginButton />
-          )}
+            {userEmail ? (
+              <>
+                <div className="hidden max-w-[220px] truncate rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 lg:block">
+                  {userEmail}
+                </div>
+                {isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={onAdminPanel}
+                    className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 text-[15px] font-bold text-sky-700 shadow-sm transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100"
+                  >
+                    <Shield className="h-4 w-4" aria-hidden />
+                    <span className="hidden sm:inline">Admin Mode</span>
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200"
+                  aria-label={`${userEmail} 로그아웃`}
+                  title="로그아웃"
+                >
+                  <LogOut className="h-4 w-4" aria-hidden />
+                  <span className="hidden sm:inline">로그아웃</span>
+                </button>
+              </>
+            ) : (
+              <GoogleAdminLoginButton />
+            )}
           </div>
         </div>
       </div>

@@ -10,17 +10,14 @@ export function GoogleAdminLoginButton() {
     try {
       supabase = getSupabaseClient();
     } catch {
-      window.alert("Supabase 환경 변수를 설정한 뒤 Google 관리자 로그인을 사용할 수 있습니다.");
+      window.alert("Supabase 환경 변수를 설정한 뒤 Google 로그인을 사용할 수 있습니다.");
       return;
     }
-
-    const redirectTo =
-      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? window.location.origin;
 
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo,
+        redirectTo: window.location.origin,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -36,7 +33,7 @@ export function GoogleAdminLoginButton() {
       className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200"
     >
       <ShieldCheck className="h-4 w-4 text-sky-500" aria-hidden />
-      <span className="hidden sm:inline">관리자</span>
+      <span className="hidden sm:inline">Google 로그인</span>
     </button>
   );
 }

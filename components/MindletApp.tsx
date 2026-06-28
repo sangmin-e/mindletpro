@@ -27,6 +27,7 @@ export function MindletApp() {
   const [deleteState, setDeleteState] = useState<DeleteState>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<{ id: number; message: string; tone: ToastTone } | null>(null);
@@ -73,12 +74,8 @@ export function MindletApp() {
 
       setIsAdmin(Boolean(result.isAdmin));
       setAdminEmail(result.email ?? null);
-
-      if (result.email && !result.isAdmin) {
-        showToast("관리자로 등록된 Google 계정이 아닙니다.", "error");
-      }
     },
-    [showToast],
+    [],
   );
 
   useEffect(() => {
@@ -95,12 +92,14 @@ export function MindletApp() {
 
     supabase.auth.getSession().then(({ data }) => {
       const token = data.session?.access_token ?? null;
+      setUserEmail(data.session?.user.email ?? null);
       setAccessToken(token);
       void checkAdmin(token);
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       const token = session?.access_token ?? null;
+      setUserEmail(session?.user.email ?? null);
       setAccessToken(token);
       void checkAdmin(token);
     });
@@ -205,8 +204,9 @@ export function MindletApp() {
     await supabase.auth.signOut();
     setIsAdmin(false);
     setAdminEmail(null);
+    setUserEmail(null);
     setAccessToken(null);
-    showToast("관리자 로그아웃 완료", "success");
+    showToast("로그아웃 완료", "success");
   }
 
   async function reorderMemos(nextMemos: Memo[]) {
@@ -252,7 +252,7 @@ export function MindletApp() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <Header
         isAdmin={isAdmin}
-        adminEmail={adminEmail}
+        userEmail={userEmail ?? adminEmail}
         loading={loading}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
