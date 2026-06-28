@@ -34,6 +34,13 @@ export async function POST(request: Request) {
   const failed = updates.find((result) => result.error);
 
   if (failed?.error) {
+    if (
+      failed.error.code === "PGRST204" &&
+      failed.error.message.includes("position_index")
+    ) {
+      return jsonError("위치 이동 저장은 Supabase에서 최신 schema.sql을 다시 실행한 뒤 사용할 수 있습니다.", 409);
+    }
+
     return jsonError("메모 위치 저장에 실패했습니다.", 500);
   }
 

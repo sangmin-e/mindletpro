@@ -3,6 +3,21 @@ import { hashMemoPassword } from "@/lib/password";
 
 export const dynamic = "force-dynamic";
 
+type MemoRowWithoutPosition = {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+};
+
+function isMissingPositionColumn(error: { code?: string; message?: string } | null) {
+  return (
+    error?.code === "PGRST204" &&
+    typeof error.message === "string" &&
+    error.message.includes("position_index")
+  );
+}
+
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
@@ -11,6 +26,24 @@ export async function GET() {
       .select("id,title,content,created_at,position_index")
       .order("position_index", { ascending: true })
       .order("created_at", { ascending: false });
+
+    if (isMissingPositionColumn(error)) {
+      const fallback = await supabase
+        .from("memos")
+        .select("id,title,content,created_at")
+        .order("created_at", { ascending: false });
+
+      if (fallback.error) {
+        return Response.json({ error: "메모를 불러오지 못했습니다." }, { status: 500 });
+      }
+
+      return Response.json({
+        memos: ((fallback.data ?? []) as MemoRowWithoutPosition[]).map((memo, index) => ({
+          ...memo,
+          position_index: index,
+        })),
+      });
+    }
 
     if (error) {
       return Response.json({ error: "메모를 불러오지 못했습니다." }, { status: 500 });
@@ -48,6 +81,23 @@ export async function POST(request: Request) {
       .insert({ title, content, password_hash: passwordHash, position_index: Date.now() })
       .select("id,title,content,created_at,position_index")
       .single();
+
+    if (isMissingPositionColumn(error)) {
+      const fallback = await supabase
+        .from("memos")
+        .insert({ title, content, password_hash: passwordHash })
+        .select("id,title,content,created_at")
+        .single();
+
+      if (fallback.error) {
+        return Response.json({ error: "메모를 저장하지 못했습니다." }, { status: 500 });
+      }
+
+      return Response.json(
+        { memo: { ...(fallback.data as MemoRowWithoutPosition), position_index: Date.now() } },
+        { status: 201 },
+      );
+    }
 
     if (error) {
       return Response.json({ error: "메모를 저장하지 못했습니다." }, { status: 500 });
