@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const token = readBearerToken(request);
 
   if (!token) {
-    return Response.json({ isAdmin: false, email: null }, { status: 401 });
+    return Response.json({ isAdmin: false }, { status: 401 });
   }
 
   const supabase = getSupabaseAdmin();
@@ -13,8 +13,8 @@ export async function GET(request: Request) {
   const email = data.user?.email ?? null;
 
   if (error || !email) {
-    return Response.json({ isAdmin: false, email: null }, { status: 401 });
+    return Response.json({ isAdmin: false }, { status: 401 });
   }
 
-  return Response.json({ isAdmin: isAdminEmail(email), email });
+  return Response.json({ isAdmin: isAdminEmail(email) });
 }

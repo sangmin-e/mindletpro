@@ -5,7 +5,7 @@ import { GoogleAdminLoginButton } from "@/components/GoogleAdminLoginButton";
 
 type HeaderProps = {
   isAdmin: boolean;
-  userEmail: string | null;
+  isLoggedIn: boolean;
   loading: boolean;
   searchQuery: string;
   onSearchChange: (value: string) => void;
@@ -16,7 +16,7 @@ type HeaderProps = {
 
 export function Header({
   isAdmin,
-  userEmail,
+  isLoggedIn,
   loading,
   searchQuery,
   onSearchChange,
@@ -69,11 +69,8 @@ export function Header({
               <span className="hidden sm:inline">공유</span>
             </button>
 
-            {userEmail ? (
+            {isLoggedIn ? (
               <>
-                <div className="hidden max-w-[220px] truncate rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 lg:block">
-                  {userEmail}
-                </div>
                 {isAdmin ? (
                   <button
                     type="button"
@@ -88,7 +85,7 @@ export function Header({
                   type="button"
                   onClick={onLogout}
                   className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-[15px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-200"
-                  aria-label={`${userEmail} 로그아웃`}
+                  aria-label="로그아웃"
                   title="로그아웃"
                 >
                   <LogOut className="h-4 w-4" aria-hidden />

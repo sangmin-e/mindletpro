@@ -4,13 +4,12 @@ import { Shield, Trash2, X } from "lucide-react";
 
 type AdminPanelProps = {
   open: boolean;
-  email: string | null;
   deletingAll: boolean;
   onClose: () => void;
   onDeleteAll: () => Promise<void>;
 };
 
-export function AdminPanel({ open, email, deletingAll, onClose, onDeleteAll }: AdminPanelProps) {
+export function AdminPanel({ open, deletingAll, onClose, onDeleteAll }: AdminPanelProps) {
   if (!open) {
     return null;
   }
@@ -25,7 +24,6 @@ export function AdminPanel({ open, email, deletingAll, onClose, onDeleteAll }: A
               Admin Mode
             </div>
             <h2 className="text-lg font-semibold text-slate-900">관리자 패널</h2>
-            <p className="mt-1 break-words text-sm text-slate-500">{email}</p>
           </div>
           <button
             type="button"

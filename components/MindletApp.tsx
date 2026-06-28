@@ -26,7 +26,6 @@ export function MindletApp() {
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const [deleteState, setDeleteState] = useState<DeleteState>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,20 +61,37 @@ export function MindletApp() {
     async (token: string | null) => {
       if (!token) {
         setIsAdmin(false);
-        setAdminEmail(null);
+        setAdminPanelOpen(false);
         return;
       }
 
-      const response = await fetch("/api/admin/me", {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      });
-      const result = await response.json();
+      try {
+        const response = await fetch("/api/admin/me", {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        const result = await response.json();
+        const allowed = response.ok && Boolean(result.isAdmin);
 
-      setIsAdmin(Boolean(result.isAdmin));
-      setAdminEmail(result.email ?? null);
+        if (!allowed) {
+          const supabase = getSupabaseClient();
+          await supabase.auth.signOut();
+          setIsAdmin(false);
+          setUserEmail(null);
+          setAccessToken(null);
+          setAdminPanelOpen(false);
+          setDeleteState((current) => (current?.mode === "admin" ? null : current));
+          showToast("허용된 관리자 계정만 사용할 수 있습니다", "error");
+          return;
+        }
+
+        setIsAdmin(true);
+      } catch {
+        setIsAdmin(false);
+        setAdminPanelOpen(false);
+      }
     },
-    [],
+    [showToast],
   );
 
   useEffect(() => {
@@ -138,6 +154,12 @@ export function MindletApp() {
       return;
     }
 
+    if (deleteState.mode === "admin" && (!isAdmin || !accessToken)) {
+      showToast("허용된 관리자 계정만 사용할 수 있습니다", "error");
+      setDeleteState(null);
+      return;
+    }
+
     setDeleting(true);
     try {
       const adminDelete = deleteState.mode === "admin";
@@ -166,7 +188,7 @@ export function MindletApp() {
   }
 
   async function deleteAll() {
-    if (!accessToken) {
+    if (!isAdmin || !accessToken) {
       showToast("관리자 로그인이 필요합니다.", "error");
       return;
     }
@@ -203,14 +225,13 @@ export function MindletApp() {
     const supabase = getSupabaseClient();
     await supabase.auth.signOut();
     setIsAdmin(false);
-    setAdminEmail(null);
     setUserEmail(null);
     setAccessToken(null);
     showToast("로그아웃 완료", "success");
   }
 
   async function reorderMemos(nextMemos: Memo[]) {
-    if (!accessToken) {
+    if (!isAdmin || !accessToken) {
       showToast("관리자 로그인이 필요합니다.", "error");
       return;
     }
@@ -252,7 +273,7 @@ export function MindletApp() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <Header
         isAdmin={isAdmin}
-        userEmail={userEmail ?? adminEmail}
+        isLoggedIn={Boolean(userEmail)}
         loading={loading}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -285,7 +306,6 @@ export function MindletApp() {
       />
       <AdminPanel
         open={adminPanelOpen}
-        email={adminEmail}
         deletingAll={deletingAll}
         onClose={() => setAdminPanelOpen(false)}
         onDeleteAll={deleteAll}
